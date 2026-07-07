@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [v1.2.0](#v120)
 - [v1.1.0](#v110)
 - [v1.0.0](#v100)
 - [v1.0.0-rc1](#v100-rc1)
@@ -16,9 +17,13 @@
 - [v0.1.0](#v010)
 - [v0.1.0-rc1](#v010-rc1)
 
-## v1.1.1
+## v1.2.0
 
 ## Changes by Kind
+
+### Feature
+
+- Added airlock-micrograteway emitter support (#413, @tyxeron)
 
 ### Bugfix
 
