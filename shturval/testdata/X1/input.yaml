@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: retained
+  namespace: apps
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - retained.example.com
+      secretName: retained-tls
+  rules:
+    - host: retained.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: platform
+  namespace: gateway-system
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: platform-https
+      port: 443
+      protocol: HTTPS
+      hostname: platform.example.com
+      tls:
+        mode: Terminate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  ports:
+    - port: 80
+    - port: 443

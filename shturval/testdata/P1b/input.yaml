@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app
+  namespace: apps
+  annotations:
+    cert-manager.io/cluster-issuer: ingress-with-path
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - app.example.com
+      secretName: app-tls
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ingress-with-path
+spec:
+  acme:
+    email: ops@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: acme-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: nginx
+            name: challenge-ingress
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  ports:
+    - port: 80
+    - port: 443

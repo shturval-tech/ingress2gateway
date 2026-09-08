@@ -1,0 +1,76 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: scale
+  namespace: apps
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - host01.example.com
+        - host02.example.com
+        - host03.example.com
+        - host04.example.com
+        - host05.example.com
+      secretName: scale-tls
+  rules:
+    - host: host01.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+    - host: host02.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+    - host: host03.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+    - host: host04.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+    - host: host05.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  ports:
+    - port: 80
+    - port: 443
