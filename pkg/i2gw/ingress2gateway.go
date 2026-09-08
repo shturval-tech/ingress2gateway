@@ -40,6 +40,11 @@ const GeneratorAnnotationKey = "gateway.networking.k8s.io/generator"
 var Version = "dev" // Default value if not built with linker flags
 
 func ToGatewayAPIResources(ctx context.Context, namespace string, reader io.Reader, providers []string, emitterName string, providerSpecificFlags map[string]map[string]string, allowExperimentalGatewayAPI bool, noColor bool) ([]GatewayResources, *notifications.Report, error) {
+	return ToGatewayAPIResourcesWithOptions(ctx, namespace, reader, providers, emitterName, providerSpecificFlags, allowExperimentalGatewayAPI, noColor, SharedGatewayOptions{})
+}
+
+// ToGatewayAPIResourcesWithOptions is like ToGatewayAPIResources but accepts shared-Gateway options.
+func ToGatewayAPIResourcesWithOptions(ctx context.Context, namespace string, reader io.Reader, providers []string, emitterName string, providerSpecificFlags map[string]map[string]string, allowExperimentalGatewayAPI bool, noColor bool, sharedOpts SharedGatewayOptions) ([]GatewayResources, *notifications.Report, error) {
 	var clusterClient client.Client
 
 	if reader == nil {
@@ -80,6 +85,7 @@ func ToGatewayAPIResources(ctx context.Context, namespace string, reader io.Read
 	emitterConf := &EmitterConf{
 		AllowExperimentalGatewayAPI: allowExperimentalGatewayAPI,
 		Report:                      report,
+		SharedGateway:               sharedOpts,
 	}
 	newEmitterFunc, ok := EmitterConstructorByName[EmitterName(emitterName)]
 	if !ok {
@@ -108,6 +114,12 @@ func ToGatewayAPIResources(ctx context.Context, namespace string, reader io.Read
 	}
 	if len(errs) > 0 {
 		return nil, report, aggregatedErrs(errs)
+	}
+
+	for i := range gatewayResources {
+		if err := ApplySharedGateway(&gatewayResources[i], sharedOpts); err != nil {
+			return nil, report, err
+		}
 	}
 
 	return gatewayResources, report, nil
