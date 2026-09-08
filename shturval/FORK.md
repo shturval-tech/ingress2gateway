@@ -42,3 +42,12 @@ go build -o ingress-gw-migrate ./shturval/cmd/ingress-gw-migrate
 ## Plan 5
 
 This CLI does **not** own platform Helm routes or ClusterConfig cutover. Platform brownfield migration stays in cluster-manager.
+
+## Upstream PR drafts (contrib)
+
+Open against `kubernetes-sigs/ingress2gateway` (requires fork permissions / `gh`):
+
+1. Gateway API bump: https://github.com/kubernetes-sigs/ingress2gateway/compare/main...shturval-tech:ingress2gateway:contrib/gateway-api-1.6.1?expand=1
+2. Shared Gateway helpers (includes bump): https://github.com/kubernetes-sigs/ingress2gateway/compare/main...shturval-tech:ingress2gateway:contrib/shared-gateway?expand=1
+
+Branches are published on `origin` (`shturval-tech/ingress2gateway`). Diffs contain **no** `shturval/` paths.
