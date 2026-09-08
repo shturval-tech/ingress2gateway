@@ -1,0 +1,46 @@
+name: shturval
+
+on:
+  push:
+    branches:
+      - shturval
+  pull_request:
+    branches:
+      - shturval
+
+permissions:
+  contents: read
+
+jobs:
+  guard-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.0'
+          cache-dependency-path: go.sum
+
+      - name: Dependency guard (no private GitLab host)
+        run: |
+          set -euo pipefail
+          # Construct host so this workflow file itself is not a positive match.
+          forbidden="$(printf '%s.%s.%s' 'gitlab' 'jet' 'su')"
+          failed=0
+          while IFS= read -r -d '' f; do
+            case "$f" in
+              ./docs/*|*.md) continue ;;
+            esac
+            if grep -qF "$forbidden" "$f"; then
+              echo "FORBIDDEN reference in $f"
+              failed=1
+            fi
+          done < <(find . -type f \( -name 'go.mod' -o -name 'go.sum' -o -name '*.go' -o -name 'Makefile' -o -name '.goreleaser.yaml' \) -print0; find ./.github/workflows -type f -print0 2>/dev/null || true)
+          exit "$failed"
+
+      - name: Build shturval
+        run: go build ./shturval/...
+
+      - name: Test shturval
+        run: go test -race -count=1 ./shturval/...

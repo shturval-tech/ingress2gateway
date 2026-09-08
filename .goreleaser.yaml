@@ -7,7 +7,18 @@ before:
     # you may remove this if you don't need go generate
     # - go generate ./...
 builds:
-  - env:
+  - id: ingress2gateway
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    ldflags:
+      - -X 'github.com/kubernetes-sigs/ingress2gateway/pkg/i2gw.Version={{.Version}}'
+  - id: ingress-gw-migrate
+    main: ./shturval/cmd/ingress-gw-migrate
+    env:
       - CGO_ENABLED=0
     goos:
       - linux

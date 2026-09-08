@@ -162,6 +162,20 @@ e2e: build ## Run end-to-end tests.
 	fi; \
 	exit $$test_exit_code
 
+# Shturval overlay targets
+.PHONY: shturval-fmt shturval-vet shturval-test shturval-build
+shturval-fmt: ;$(info $(M)...Format shturval Go sources.) @ ## Run gofmt on shturval/
+	gofmt -w ./shturval
+
+shturval-vet: ;$(info $(M)...Vet shturval packages.) @ ## Run go vet on shturval/
+	go vet ./shturval/...
+
+shturval-test: shturval-vet ;$(info $(M)...Test shturval packages.) @ ## Run shturval unit tests
+	go test -race -count=1 ./shturval/...
+
+shturval-build: shturval-vet ;$(info $(M)...Build ingress-gw-migrate.) @ ## Build Shturval CLI binary
+	go build $(LDFLAGS) -o ingress-gw-migrate ./shturval/cmd/ingress-gw-migrate
+
 .PHONY: clean-kind
 clean-kind:
 	$(KIND) delete cluster -n i2gw-e2e

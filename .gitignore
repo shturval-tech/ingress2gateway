@@ -33,3 +33,5 @@ go.work
 kind-kubeconfig
 e2e/kind.yaml
 bin
+ingress2gateway
+ingress-gw-migrate
