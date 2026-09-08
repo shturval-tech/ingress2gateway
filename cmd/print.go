@@ -88,6 +88,12 @@ type PrintRunner struct {
 
 	// allowExperimentalGatewayAPI indicates whether Experimental Gateway API features (like URLRewrite) should be included in the output.
 	allowExperimentalGatewayAPI bool
+
+	// Shared Gateway post-process options.
+	gatewayName      string
+	gatewayNamespace string
+	gatewayClassName string
+	defaultTLSSecret string
 }
 
 // PrintGatewayAPIObjects performs necessary steps to digest and print
@@ -153,7 +159,12 @@ func (pr *PrintRunner) PrintGatewayAPIObjects(cmd *cobra.Command, _ []string) er
 		}
 	}
 
-	gatewayResources, report, err = i2gw.ToGatewayAPIResources(cmd.Context(), pr.namespaceFilter, inputReader, pr.providers, pr.emitter, pr.getProviderSpecificFlags(), pr.allowExperimentalGatewayAPI, noColor)
+	gatewayResources, report, err = i2gw.ToGatewayAPIResourcesWithOptions(cmd.Context(), pr.namespaceFilter, inputReader, pr.providers, pr.emitter, pr.getProviderSpecificFlags(), pr.allowExperimentalGatewayAPI, noColor, i2gw.SharedGatewayOptions{
+		GatewayName:      pr.gatewayName,
+		GatewayNamespace: pr.gatewayNamespace,
+		GatewayClassName: pr.gatewayClassName,
+		DefaultTLSSecret: pr.defaultTLSSecret,
+	})
 
 	if err != nil {
 		return err
@@ -420,6 +431,15 @@ if specified with --namespace.`)
 		fmt.Sprintf("If present, the tool will try to convert only resources related to the specified providers, supported values are %v.", i2gw.GetSupportedProviders()))
 
 	cmd.Flags().BoolVar(&pr.allowExperimentalGatewayAPI, "allow-experimental-gw-api", false, "If present, the tool will include Experimental Gateway API fields (e.g. URLRewrite) in the output. Default is false.")
+
+	cmd.Flags().StringVar(&pr.gatewayName, "gateway-name", "",
+		"If set, merge all Gateways into a single Gateway with this name and rewrite route parentRefs.")
+	cmd.Flags().StringVar(&pr.gatewayNamespace, "gateway-namespace", "",
+		"Namespace for the merged Gateway (used with --gateway-name). Defaults to the first Gateway namespace.")
+	cmd.Flags().StringVar(&pr.gatewayClassName, "gateway-class-name", "",
+		"Override GatewayClassName on emitted Gateway(s).")
+	cmd.Flags().StringVar(&pr.defaultTLSSecret, "default-tls-secret", "",
+		"Apply this TLS Secret (namespace/name) to HTTPS listeners that have no certificateRefs.")
 
 	pr.providerSpecificFlags = make(map[string]*string)
 	for provider, flags := range i2gw.GetProviderSpecificFlagDefinitions() {

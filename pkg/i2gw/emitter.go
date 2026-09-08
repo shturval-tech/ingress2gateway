@@ -64,4 +64,14 @@ type EmitterConf struct {
 	// AllowExperimentalGatewayAPI indicates whether Experimental Gateway API features (like URLRewrite) should be included in the output.
 	AllowExperimentalGatewayAPI bool
 	Report                      *notifications.Report
+	// SharedGateway optionally merges Gateways and rewrites parentRefs after emit.
+	SharedGateway SharedGatewayOptions
+}
+
+// SharedGatewayOptions configures optional shared-Gateway post-processing.
+type SharedGatewayOptions struct {
+	GatewayName      string
+	GatewayNamespace string
+	GatewayClassName string
+	DefaultTLSSecret string
 }
